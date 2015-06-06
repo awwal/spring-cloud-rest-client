@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013-2014 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.lawal.springcloud.rest;
 
 import com.lawal.springcloud.eureka.model.xml.Applications;
@@ -16,7 +31,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 /**
- * Created by Lawal on 06/06/2015.
+ *Connects to an spring-eureka instance and fetches the application descriptor object provided by the eureka api.
+ *
+ * @author Lawal Olufowobi
  */
 public class EurekaRestClient {
 
@@ -34,6 +51,11 @@ public class EurekaRestClient {
     }
 
 
+    /**
+     *
+     * @param eurekaUrl The url to the eureka server
+     * @param configServerAppId The application Id of the config server
+     */
     public EurekaRestClient(String eurekaUrl, String configServerAppId) {
         this.configServerAppId = configServerAppId;
         Client client = ClientBuilder.newClient();

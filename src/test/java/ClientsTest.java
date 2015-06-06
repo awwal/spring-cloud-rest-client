@@ -61,7 +61,7 @@ public class ClientsTest {
     public void testSpringCloudWithEureka(){
 
         SpringCloudEurekaRestClient cloudEurekaClient = new SpringCloudEurekaRestClient(eurekaUrl,configServerId);
-        Properties props = cloudEurekaClient.getApplicationProperties(applicationName, "dev", "Master");
+        Properties props = cloudEurekaClient.getApplicationProperties("myconfig", "dev", "Master");
         assertNotNull(props);
         assertFalse(props.isEmpty());
         System.out.println(props);
