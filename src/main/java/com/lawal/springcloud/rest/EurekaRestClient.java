@@ -30,80 +30,74 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
+
 /**
- *Connects to an spring-eureka instance and fetches the application descriptor object provided by the eureka api.
+ * Connects to an spring-eureka instance and fetches the application descriptor object provided by the eureka api.
  *
  * @author Lawal Olufowobi
  */
 public class EurekaRestClient {
 
+	private final static String ApplicationResourcePath = "eureka/apps/{appId}";
 
-    private final static String ApplicationResourcePath = "eureka/apps/{appId}";
+	private static final String DEFAULT_CONFIG_SERVER_ID = "CONFIGSERVER";
+	private static Logger LOG = LoggerFactory.getLogger(EurekaRestClient.class);
+	private final WebTarget baseTarget;
+	private String configServerAppId;
 
-    private static final String DEFAULT_CONFIG_SERVER_ID = "CONFIGSERVER";
-    private final WebTarget baseTarget;
-    private String configServerAppId;
-    private static Logger LOG = LoggerFactory.getLogger(EurekaRestClient.class);
+	public EurekaRestClient(String eurekaUrl) {
+		this(eurekaUrl, DEFAULT_CONFIG_SERVER_ID);
+	}
 
+	/**
+	 *
+	 * @param eurekaUrl The url to the eureka server
+	 * @param configServerAppId The application Id of the config server
+	 */
+	public EurekaRestClient(String eurekaUrl, String configServerAppId) {
+		this.configServerAppId = configServerAppId;
+		Client client = ClientBuilder.newClient();
+		baseTarget = client.target(eurekaUrl);
+	}
 
-    public EurekaRestClient(String eurekaUrl) {
-        this(eurekaUrl, DEFAULT_CONFIG_SERVER_ID);
-    }
+	public Applications getApplication() {
 
+		LOG.info("Connecting to eureka server " + baseTarget.getUri() + " seeking application with id="
+				+ configServerAppId);
 
-    /**
-     *
-     * @param eurekaUrl The url to the eureka server
-     * @param configServerAppId The application Id of the config server
-     */
-    public EurekaRestClient(String eurekaUrl, String configServerAppId) {
-        this.configServerAppId = configServerAppId;
-        Client client = ClientBuilder.newClient();
-        baseTarget = client.target(eurekaUrl);
-    }
+		WebTarget target = baseTarget.path(ApplicationResourcePath).resolveTemplate("appId", configServerAppId);
+		// WebTarget target = baseTarget.path("eureka/apps/");
+		Response res = target.request().accept(MediaType.APPLICATION_XML_TYPE).get();
+		if (res.getStatusInfo().getFamily() != Response.Status.OK.getFamily()) {
+			return null;
+		}
+		String responseString = res.readEntity(String.class);
 
+		LOG.trace(responseString);
+		try {
+			JAXBContext jc = JAXBContext.newInstance(ObjectFactory.class);
+			Unmarshaller unmarshaller = jc.createUnmarshaller();
+			ByteArrayInputStream bais = new ByteArrayInputStream(responseString.getBytes());
 
-    public Applications getApplication() {
+			Object unmarshalled = unmarshaller.unmarshal(bais);
+			if (unmarshalled instanceof Application) {
+				Application application = (Application) unmarshalled;
+				Applications applications = new Applications();
+				applications.getApplication().add(application);
+				return applications;
+			}
 
-        LOG.info("Connecting to eureka server "+baseTarget.getUri()+ " seeking application with id="+ configServerAppId);
+			if (unmarshalled instanceof Applications) {
+				Applications applications = (Applications) unmarshalled;
+				return applications;
+			}
 
-        WebTarget target = baseTarget.path(ApplicationResourcePath).resolveTemplate("appId", configServerAppId);
-//        WebTarget target = baseTarget.path("eureka/apps/");
-        Response res = target.request().accept(MediaType.APPLICATION_XML_TYPE).get();
-        if (res.getStatusInfo().getFamily() != Response.Status.OK.getFamily()) {
-            return null;
-        }
-        String responseString = res.readEntity(String.class);
+		}
+		catch (JAXBException e) {
+			e.printStackTrace();
+		}
 
-        LOG.trace(responseString);
-        try {
-            JAXBContext jc = JAXBContext.newInstance(ObjectFactory.class);
-            Unmarshaller unmarshaller = jc.createUnmarshaller();
-            ByteArrayInputStream bais = new ByteArrayInputStream(responseString.getBytes());
-
-
-            Object unmarshalled = unmarshaller.unmarshal(bais);
-            if (unmarshalled instanceof Application) {
-                Application application = (Application) unmarshalled;
-                Applications applications = new Applications();
-                applications.getApplication().add(application);
-                return applications;
-            }
-
-            if (unmarshalled instanceof Applications) {
-                Applications applications = (Applications) unmarshalled;
-                return applications;
-            }
-
-
-
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
-
-
-        return null;
-    }
-
+		return null;
+	}
 
 }

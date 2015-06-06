@@ -26,97 +26,90 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- *  * A Java wrapper for the spring-cloud-config server that is registered to an eureka instance.
- *  Combines the <tt>EurekaRestClient</tt> and <tt>SpringCloudRestClient</tt> to provide the target the
- *  configuration file has a Java <tt>Properties</tt> object
+ * * A Java wrapper for the spring-cloud-config server that is registered to an eureka instance. Combines the
+ * <tt>EurekaRestClient</tt> and <tt>SpringCloudRestClient</tt> to provide the target the configuration file has a Java
+ * <tt>Properties</tt> object
  *
  *
- * @author  Lawal Olufowobi
+ * @author Lawal Olufowobi
  */
 public class SpringCloudEurekaRestClient {
 
+	private static Logger LOG = LoggerFactory.getLogger(SpringCloudEurekaRestClient.class);
 
+	private final String eurekaUrl;
 
-    private static Logger LOG = LoggerFactory.getLogger(SpringCloudEurekaRestClient.class);
-    private final String eurekaUrl;
-    private final String configserverId;
+	private final String configserverId;
 
+	public SpringCloudEurekaRestClient(String eurekaUrl, String configserverId) {
+		this.eurekaUrl = eurekaUrl;
+		this.configserverId = configserverId;
+	}
 
-    public SpringCloudEurekaRestClient(String eurekaUrl, String configserverId) {
-        this.eurekaUrl = eurekaUrl;
-        this.configserverId = configserverId;
-    }
+	/**
+	 * @param instances List of potential instance of the configuration server.
+	 * @param application Name of the application
+	 * @param profile E.g dev, prod
+	 * @param gitLabel The branch name or commitId
+	 * @return a <tt>Properties</tt> or null
+	 */
 
+	private Properties getApplicationProperties(Collection<Instance> instances, String application, String profile,
+			String gitLabel) {
 
+		for (Instance instance : instances) {
 
-    /**
-     * @param instances List of potential instance of the configuration server.
-     * @param application Name of the application
-     * @param profile E.g dev, prod
-     * @param gitLabel The branch name or commitId
-     * @return a <tt>Properties</tt> or null
-     */
+			String ipAddr = instance.getIpAddr();
+			int port;
+			String protocol;
+			if (instance.getSecurePort().isEnabled()) {
+				port = instance.getSecurePort().getValue();
+				protocol = "https://";
 
-    private Properties getApplicationProperties(Collection<Instance> instances, String application, String profile, String gitLabel) {
+			}
+			else {
 
+				port = instance.getPort().getValue();
+				protocol = "http://";
+			}
 
+			Properties prop = getPropertiesFromInstance(protocol + ipAddr + ":" + port, application, profile, gitLabel);
+			if (prop != null) {
+				return prop;
+			}
 
-        for (Instance instance : instances) {
+			LOG.debug("Not found in instance " + instance.getHomePageUrl());
+		}
+		return null;
+	}
 
-            String ipAddr = instance.getIpAddr();
-            int port;
-            String protocol;
-            if (instance.getSecurePort().isEnabled()) {
-                port = instance.getSecurePort().getValue();
-                protocol = "https://";
+	private Properties getPropertiesFromInstance(String instanceUrl, String application, String profile, String gitLabel) {
 
-            } else {
+		SpringCloudRestClient cloudRestClient = new SpringCloudRestClient(instanceUrl);
+		return cloudRestClient.getProperties(application, profile, gitLabel);
 
-                port = instance.getPort().getValue();
-                protocol = "http://";
-            }
+	}
 
-            Properties prop = getPropertiesFromInstance(protocol + ipAddr + ":" + port, application, profile, gitLabel);
-            if (prop != null) {
-                return prop;
-            }
+	/**
+	 * @param application Name of the application (i.e the target properties file)
+	 * @param profile E.g dev, prod
+	 * @param gitLabel The branch name or commitId
+	 * @return a <tt>Properties</tt> or null
+	 */
+	public Properties getApplicationProperties(String application, String profile, String gitLabel) {
 
+		EurekaRestClient eurekaClient = new EurekaRestClient(eurekaUrl, configserverId);
 
-            LOG.debug("Not found in instance "+instance.getHomePageUrl());
-        }
-        return null;
-    }
+		Applications applications = eurekaClient.getApplication();
 
-    private Properties getPropertiesFromInstance(String instanceUrl, String application, String profile, String gitLabel) {
+		List<Application> appList = applications.getApplication();
+		if (appList.isEmpty())
+			return null;
 
+		Application app = appList.iterator().next();
+		List<Instance> appInstanceList = app.getInstance();
+		return getApplicationProperties(appInstanceList, application, profile, gitLabel);
 
-        SpringCloudRestClient cloudRestClient = new SpringCloudRestClient(instanceUrl);
-        return cloudRestClient.getProperties(application, profile, gitLabel);
-
-
-    }
-
-
-    /**
-     * @param application Name of the application (i.e the target properties file)
-     * @param profile E.g dev, prod
-     * @param gitLabel The branch name or commitId
-     * @return a <tt>Properties</tt> or null
-     */
-    public Properties getApplicationProperties(String application, String profile, String gitLabel) {
-
-        EurekaRestClient eurekaClient =  new EurekaRestClient(eurekaUrl, configserverId);
-
-        Applications applications = eurekaClient.getApplication();
-
-        List<Application> appList = applications.getApplication();
-        if (appList.isEmpty()) return null;
-
-        Application app = appList.iterator().next();
-        List<Instance> appInstanceList = app.getInstance();
-        return getApplicationProperties(appInstanceList, application, profile, gitLabel);
-
-
-    }
+	}
 
 }

@@ -29,52 +29,55 @@ import java.util.Properties;
 /**
  * @author Lawal Olufowobi
  *
- * A Java wrapper for the spring-cloud-config server to fetch configuration files as <tt>Properties</tt> object that can be used in non-spring application
+ * A Java wrapper for the spring-cloud-config server to fetch configuration files as <tt>Properties</tt> object that can
+ * be used in non-spring application
  *
  */
 public class SpringCloudRestClient {
 
+	public static final String resourcePath = "/{label}/{application}-{profile}.properties";
 
-    public static final String resourcePath = "/{label}/{application}-{profile}.properties";
-    public static final String defaultGitLabel = "Master";
-    public static final String defaultProfile = "default";
-    private static Logger LOG = LoggerFactory.getLogger(SpringCloudRestClient.class);
-    private WebTarget baseTarget;
+	public static final String defaultGitLabel = "Master";
 
-    public SpringCloudRestClient(String springcloudUrl) {
-        Client client = ClientBuilder.newClient();
-        baseTarget = client.target(springcloudUrl);
-    }
+	public static final String defaultProfile = "default";
 
+	private static Logger LOG = LoggerFactory.getLogger(SpringCloudRestClient.class);
 
-    public Properties getProperties(String application, String profile, String gitLabel) {
+	private WebTarget baseTarget;
 
-        if (profile == null) profile = defaultProfile;
-        if (gitLabel == null) gitLabel = defaultGitLabel;
+	public SpringCloudRestClient(String springcloudUrl) {
+		Client client = ClientBuilder.newClient();
+		baseTarget = client.target(springcloudUrl);
+	}
 
+	public Properties getProperties(String application, String profile, String gitLabel) {
 
-        WebTarget target = baseTarget.path(resourcePath)
-                .resolveTemplate("label", gitLabel)
-                .resolveTemplate("application", application)
-                .resolveTemplate("profile", profile);
+		if (profile == null)
+			profile = defaultProfile;
+		if (gitLabel == null)
+			gitLabel = defaultGitLabel;
 
-        LOG.info("Connecting to spring cloud config server " + target.getUri() + " for application=" + application + " profile=" + profile + " gitLabel=" + gitLabel);
+		WebTarget target = baseTarget.path(resourcePath).resolveTemplate("label", gitLabel)
+				.resolveTemplate("application", application).resolveTemplate("profile", profile);
 
+		LOG.info("Connecting to spring cloud config server " + target.getUri() + " for application=" + application
+				+ " profile=" + profile + " gitLabel=" + gitLabel);
 
-        Response res = target.request().get();
-        if (res.getStatusInfo().getFamily() != Response.Status.OK.getFamily()) {
-            return null;
-        }
-        String responseString = res.readEntity(String.class);
+		Response res = target.request().get();
+		if (res.getStatusInfo().getFamily() != Response.Status.OK.getFamily()) {
+			return null;
+		}
+		String responseString = res.readEntity(String.class);
 
-        try {
-            Properties p = new Properties();
-            p.load(new StringReader(responseString));
-            return p;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		try {
+			Properties p = new Properties();
+			p.load(new StringReader(responseString));
+			return p;
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 
-        return null;
-    }
+		return null;
+	}
 }
