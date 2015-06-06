@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 /**
  * Created by Lawal on 06/06/2015.
  */
-public class EurekaFinderTest {
+public class ClientsTest {
 
     private final static String eurekaUrl = "http://192.168.1.180:8761/";
     private final static String configServerId= "ConfigServer";
