@@ -16,8 +16,7 @@ import java.util.Properties;
 public class SpringCloudEurekaRestClient {
 
 
-    public static final String defaultGitLabel = "Master";
-    public static final String defaultProfile = "default";
+
     private static Logger LOG = LoggerFactory.getLogger(SpringCloudEurekaRestClient.class);
     private final String eurekaUrl;
     private final String configserverId;
@@ -31,8 +30,7 @@ public class SpringCloudEurekaRestClient {
 
     private Properties getApplicationProperties(Collection<Instance> instances, String application, String profile, String gitLabel) {
 
-        if (profile == null) profile = defaultProfile;
-        if (gitLabel == null) gitLabel = defaultGitLabel;
+
 
         for (Instance instance : instances) {
 
@@ -55,6 +53,7 @@ public class SpringCloudEurekaRestClient {
             }
 
 
+            LOG.debug("Not found in instance "+instance.getHomePageUrl());
         }
         return null;
     }

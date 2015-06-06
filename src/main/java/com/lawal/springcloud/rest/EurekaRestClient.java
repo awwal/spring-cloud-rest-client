@@ -25,7 +25,7 @@ public class EurekaRestClient {
 
     private static final String DEFAULT_CONFIG_SERVER_ID = "CONFIGSERVER";
     private final WebTarget baseTarget;
-    private String configServerId;
+    private String configServerAppId;
     private static Logger LOG = LoggerFactory.getLogger(EurekaRestClient.class);
 
 
@@ -34,8 +34,8 @@ public class EurekaRestClient {
     }
 
 
-    public EurekaRestClient(String eurekaUrl, String configServerId) {
-        this.configServerId = configServerId;
+    public EurekaRestClient(String eurekaUrl, String configServerAppId) {
+        this.configServerAppId = configServerAppId;
         Client client = ClientBuilder.newClient();
         baseTarget = client.target(eurekaUrl);
     }
@@ -43,9 +43,9 @@ public class EurekaRestClient {
 
     public Applications getApplication() {
 
-        LOG.info("Connecting to eureka server "+baseTarget.getUri()+ " seeking application with id "+ configServerId);
+        LOG.info("Connecting to eureka server "+baseTarget.getUri()+ " seeking application with id="+ configServerAppId);
 
-        WebTarget target = baseTarget.path(ApplicationResourcePath).resolveTemplate("appId", configServerId);
+        WebTarget target = baseTarget.path(ApplicationResourcePath).resolveTemplate("appId", configServerAppId);
 //        WebTarget target = baseTarget.path("eureka/apps/");
         Response res = target.request().accept(MediaType.APPLICATION_XML_TYPE).get();
         if (res.getStatusInfo().getFamily() != Response.Status.OK.getFamily()) {

@@ -1253,7 +1253,7 @@ public class Applications {
             public static class Port {
 
                 @XmlValue
-                protected short value;
+                protected int value;
                 @XmlAttribute
                 protected Boolean enabled;
 
@@ -1261,7 +1261,7 @@ public class Applications {
                  * Gets the value of the value property.
                  * 
                  */
-                public short getValue() {
+                public int getValue() {
                     return value;
                 }
 
@@ -1269,7 +1269,7 @@ public class Applications {
                  * Sets the value of the value property.
                  * 
                  */
-                public void setValue(short value) {
+                public void setValue(int value) {
                     this.value = value;
                 }
 
@@ -1324,7 +1324,7 @@ public class Applications {
             public static class SecurePort {
 
                 @XmlValue
-                protected short value;
+                protected int value;
                 @XmlAttribute
                 protected Boolean enabled;
 
@@ -1332,7 +1332,7 @@ public class Applications {
                  * Gets the value of the value property.
                  * 
                  */
-                public short getValue() {
+                public int getValue() {
                     return value;
                 }
 
@@ -1340,7 +1340,7 @@ public class Applications {
                  * Sets the value of the value property.
                  * 
                  */
-                public void setValue(short value) {
+                public void setValue(int value) {
                     this.value = value;
                 }
 
