@@ -18,7 +18,7 @@ import java.io.ByteArrayInputStream;
 /**
  * Created by Lawal on 06/06/2015.
  */
-public class EurekaFinder {
+public class EurekaRestClient {
 
 
     private final static String ApplicationResourcePath = "eureka/apps/{appId}";
@@ -26,15 +26,15 @@ public class EurekaFinder {
     private static final String DEFAULT_CONFIG_SERVER_ID = "CONFIGSERVER";
     private final WebTarget baseTarget;
     private String configServerId;
-    private static Logger LOG = LoggerFactory.getLogger(EurekaFinder.class);
+    private static Logger LOG = LoggerFactory.getLogger(EurekaRestClient.class);
 
 
-    public EurekaFinder(String eurekaUrl) {
+    public EurekaRestClient(String eurekaUrl) {
         this(eurekaUrl, DEFAULT_CONFIG_SERVER_ID);
     }
 
 
-    public EurekaFinder(String eurekaUrl, String configServerId) {
+    public EurekaRestClient(String eurekaUrl, String configServerId) {
         this.configServerId = configServerId;
         Client client = ClientBuilder.newClient();
         baseTarget = client.target(eurekaUrl);
