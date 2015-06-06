@@ -12,14 +12,14 @@ import static org.junit.Assert.*;
 
 
 /**
- * Created by Lawal on 06/06/2015.
+ * @author Lawal Olufowobi
  */
 public class ClientsTest {
 
-    private final static String eurekaUrl = "http://192.168.1.180:8761/";
+    private final static String eurekaUrl = "http://localhost:8761/";
     private final static String configServerId= "ConfigServer";
-    private static final String cloudServerUrl = "http://192.168.1.180:8882/";
-    private String applicationName = "phonebook";
+    private static final String cloudServerUrl = "http://localhost:8888/";
+    private String applicationName = "foo";
 
 
     @Test
